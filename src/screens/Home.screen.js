@@ -24,7 +24,7 @@ const HomeScreen = props => {
         [],
         function (tx, res) {
           console.log('item:', res.rows.length);
-          if (res.rows.length == 0) {
+          if (res.rows.length === 0) {
             // txn.executeSql('DROP TABLE IF EXISTS Trip_Table', []);
             txn.executeSql(
               'CREATE TABLE IF NOT EXISTS Trip_Table(id INTEGER PRIMARY KEY AUTOINCREMENT, trip_name TEXT, trip_destination TEXT, trip_date TEXT, trip_assessment TEXT, description TEXT)',
@@ -34,7 +34,7 @@ const HomeScreen = props => {
         },
       );
     });
-    Alert.alert('SQLite Database and Table Successfully Created...');
+    // Alert.alert('SQLite Database and Table Successfully Created...');
   };
 
   const [flatListItems, setFlatListItems] = useState([]);
@@ -43,8 +43,9 @@ const HomeScreen = props => {
     (await db).transaction(function (tx) {
       tx.executeSql('SELECT * FROM Trip_Table', [], (tx, results) => {
         let payload = [];
-        for (let i = 0; i < results.rows.length; ++i)
+        for (let i = 0; i < results.rows.length; ++i) {
           payload.push(results.rows.item(i));
+        }
         setFlatListItems(payload);
       });
     });
@@ -52,10 +53,22 @@ const HomeScreen = props => {
 
   const listTripItem = item => {
     return (
-      <TouchableOpacity style={styles.tripItem} activeOpacity={0.6}>
+      <TouchableOpacity
+        style={styles.tripItem}
+        activeOpacity={0.6}
+        onPress={() => {
+          props.navigation.navigate('UpDateTripScreen', {
+            tripId: item.id,
+            nameTripItem: item.trip_name,
+            destinationTripItem: item.trip_destination,
+            dateTripItem: item.trip_date,
+            assessment: item.trip_assessment,
+            descriptionTripItem: item.description,
+          });
+        }}>
         <View style={styles.tripItemContent} key={item.user_id}>
           <View style={styles.tripIdArea}>
-            <Text style={styles.tripId}>{item.trip_id}</Text>
+            <Text style={styles.tripId}>{item.id}</Text>
           </View>
           <View style={styles.tripNameArea}>
             <Text style={styles.tripContentFirst}>{item.trip_name}</Text>
@@ -83,10 +96,45 @@ const HomeScreen = props => {
     );
   };
 
+  const renderEmpTyData = () => {
+    return (
+      <View>
+        <View style={styles.tripNodataView}>
+          <Image
+            style={styles.tripNodata}
+            source={require('../Public/image/data.png')}
+          />
+        </View>
+        <Text style={styles.label}>No Data</Text>
+      </View>
+    );
+  };
+
+  const deleteAllTrip = async () => {
+    const query = 'drop table Trip_Table';
+
+    Alert.alert('DELETE FOREVER', 'You want to delete all Trip ???', [
+      {
+        text: 'Yes',
+        onPress: () => setFlatListItems([]),
+      },
+      {
+        text: 'No',
+        onPress: () => props.navigation.navigate('HomeScreen'),
+        style: 'No',
+      },
+    ]);
+    await db.executeSql(query);
+  };
+
   useEffect(() => {
     createTable();
     getAllTrip();
-  }, []);
+    const focusHandler = props.navigation.addListener('focus', () => {
+      getAllTrip();
+    });
+    return focusHandler;
+  }, [props]);
 
   return (
     <>
@@ -98,6 +146,14 @@ const HomeScreen = props => {
       <SafeAreaView style={{backgroundColor: COLORS.white}}>
         <View style={styles.container}>
           <View style={styles.tripHeader}>
+            <TouchableWithoutFeedback onPress={deleteAllTrip}>
+              <View style={styles.tripDeleteImageView}>
+                <Image
+                  style={styles.tripDeleteImage}
+                  source={require('../Public/image/deleteAll.png')}
+                />
+              </View>
+            </TouchableWithoutFeedback>
             <Text style={styles.tripHeaderText}>List of Trip</Text>
             <TouchableWithoutFeedback
               onPress={() => {
@@ -109,7 +165,7 @@ const HomeScreen = props => {
             </TouchableWithoutFeedback>
           </View>
           <View style={{padding: 10, marginTop: 10, flex: 1}}>
-            {renderTripItem()}
+            {flatListItems.length > 0 ? renderTripItem() : renderEmpTyData()}
           </View>
         </View>
       </SafeAreaView>
@@ -123,6 +179,20 @@ const styles = StyleSheet.create({
     height: 800,
     backgroundColor: COLORS.white,
     textAlign: 'center',
+  },
+  tripNodataView: {
+    flex: 1,
+    width: 260,
+    height: 60,
+    marginLeft: 68,
+    marginTop: 120,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  tripNodata: {
+    width: 80,
+    height: 80,
+    alignItems: 'center',
   },
   tripHeader: {
     width: '100%',
@@ -143,6 +213,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
     position: 'absolute',
     right: 0,
+  },
+  tripDeleteImageView: {
+    width: 48,
+    height: 32,
+    marginLeft: 16,
+    position: 'absolute',
+    left: 0,
+  },
+  tripDeleteImage: {
+    width: 24,
+    height: 32,
+    marginTop: 12,
   },
   tripItem: {
     marginTop: 18,
@@ -186,6 +268,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.white,
+  },
+  label: {
+    marginTop: 88,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    textAlign: 'center',
   },
 });
 

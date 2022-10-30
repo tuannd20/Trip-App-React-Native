@@ -3,7 +3,7 @@ import {View, Text, TextInput, StyleSheet} from 'react-native';
 import COLORS from '../constant/color';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const Input = ({label, error, onFocus = () => {}, ...props}) => {
+const Input = ({label, error, value, onFocus = () => {}, ...props}) => {
   const [isFocused, setIsFocused] = React.useState(false);
 
   return (
@@ -34,6 +34,7 @@ const Input = ({label, error, onFocus = () => {}, ...props}) => {
           onBlur={() => setIsFocused(false)}
           style={{color: COLORS.black, flex: 1}}
           onChangeText={props.onChangeText}
+          value={value}
           {...props}
         />
       </View>

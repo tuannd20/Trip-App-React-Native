@@ -3,6 +3,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import HomeScreen from '../screens/Home.screen';
 import AddTripScreen from '../screens/AddTrip.screen';
+import UpDateTripScreen from '../screens/UpdateTrip.screen';
 
 const Stack = createStackNavigator();
 
@@ -14,6 +15,10 @@ const stackScreens = [
   {
     name: 'AddTripScreen',
     component: AddTripScreen,
+  },
+  {
+    name: 'UpDateTripScreen',
+    component: UpDateTripScreen,
   },
 ];
 

@@ -5,39 +5,43 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  Button,
   Alert,
   TouchableWithoutFeedback,
 } from 'react-native';
+import {RadioButton} from 'react-native-paper';
 import COLORS from '../constant/color';
 import Input from '../components/input.component';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import RadioForm from 'react-native-radio-form';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {openDatabase} from 'react-native-sqlite-storage';
 
-const mockData = [
-  {
-    label: 'Yes',
-    value: 'Yes',
-  },
-  {
-    label: 'No',
-    value: 'No',
-  },
-];
-
 let db = openDatabase({name: 'TripDatabase.db'});
 
-const AddTripScreen = props => {
+const UpDateTripScreen = ({route, navigation}) => {
+  const {
+    tripId,
+    nameTripItem,
+    descriptionTripItem,
+    dateTripItem,
+    assessment,
+    destinationTripItem,
+  } = route.params;
+  console.log(
+    'update screen',
+    tripId,
+    nameTripItem,
+    descriptionTripItem,
+    dateTripItem,
+    assessment,
+    destinationTripItem,
+  );
+
   const [dateTrip, setDateTrip] = useState(new Date());
-  const [text, setText] = useState('Select date of the trip');
-  const [textAssessment, setTextAssessment] = useState('');
-
-  const [name, setName] = useState('');
-  const [destination, setDestination] = useState('');
-  const [description, setDescription] = useState('');
-
+  const [text, setText] = useState(dateTripItem);
+  const [textAssessment, setTextAssessment] = useState(assessment);
+  const [name, setName] = useState(nameTripItem);
+  const [destination, setDestination] = useState(destinationTripItem);
+  const [description, setDescription] = useState(descriptionTripItem);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   const showDatePicker = () => {
@@ -62,13 +66,7 @@ const AddTripScreen = props => {
     setDateTrip(date);
   };
 
-  let _onSelect = item => {
-    console.log(item);
-    setTextAssessment(item.value);
-  };
-  console.log('vavaavaav', textAssessment);
-
-  const addTrip = () => {
+  const updateTrip = async () => {
     console.log(name, destination, description, text, textAssessment);
 
     if (!name) {
@@ -88,25 +86,50 @@ const AddTripScreen = props => {
       return;
     }
 
-    db.transaction(function (tx) {
+    await db.transaction(function (tx) {
       tx.executeSql(
-        'INSERT INTO Trip_Table (trip_name, trip_destination, trip_date, trip_assessment, description) VALUES (?,?,?,?,?)',
-        [name, destination, text, textAssessment, description],
+        'UPDATE Trip_Table set trip_name=?, trip_destination=? , trip_date=?, trip_assessment=? , description=? where id=?',
+        [name, destination, text, textAssessment, description, tripId],
         (tx, results) => {
-          console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
             Alert.alert(
               'Success',
-              'You are Create Successfully',
+              'You are Update Successfully',
               [
                 {
                   text: 'Ok',
-                  onPress: () => props.navigation.navigate('HomeScreen'),
+                  onPress: () => navigation.navigate('HomeScreen'),
                 },
               ],
               {cancelable: false},
             );
-          } else alert('Create Failed');
+          } else alert('Update Failed');
+        },
+      );
+    });
+  };
+
+  const deleteTripById = async () => {
+    await db.transaction(tx => {
+      tx.executeSql(
+        'DELETE FROM  Trip_Table where id=?',
+        [tripId],
+        (tx, results) => {
+          if (results.rowsAffected > 0) {
+            Alert.alert(
+              'Success',
+              'Trip deleted successfully',
+              [
+                {
+                  text: 'Ok',
+                  onPress: () => navigation.navigate('HomeScreen'),
+                },
+              ],
+              {cancelable: false},
+            );
+          } else {
+            alert('Please insert a valid User Id');
+          }
         },
       );
     });
@@ -118,7 +141,7 @@ const AddTripScreen = props => {
         <View style={styles.tripHeader}>
           <TouchableWithoutFeedback
             onPress={() => {
-              props.navigation.navigate('HomeScreen');
+              navigation.navigate('HomeScreen');
             }}>
             <View style={styles.tripHeaderImage}>
               <Image
@@ -127,34 +150,43 @@ const AddTripScreen = props => {
               />
             </View>
           </TouchableWithoutFeedback>
-          <Text style={styles.tripHeaderText}>Add Trip</Text>
+          <Text style={styles.tripHeaderText}>Update Trip</Text>
         </View>
         <View style={{marginVertical: 20, paddingHorizontal: 20}}>
           <Input
             label="Name"
             placeholder="Enter name of the trip"
             onChangeText={nameInput => setName(nameInput)}
+            value={nameTripItem}
           />
           <Input
             label="Destination"
             placeholder="Enter destination of the trip"
             onChangeText={destinationInput => setDestination(destinationInput)}
+            value={destinationTripItem}
           />
           <View style={{flexDirection: 'row', marginBottom: 18}}>
             <View style={{marginTop: 3, marginRight: 10}}>
               <Text style={styles.label}>Assessment: </Text>
             </View>
-            <RadioForm
-              style={{width: 350 - 30}}
-              dataSource={mockData}
-              itemShowKey="label"
-              itemRealKey="value"
-              circleSize={16}
-              initial={1}
-              formHorizontal={true}
-              labelHorizontal={true}
-              onPress={item => _onSelect(item)}
-            />
+            <Text style={styles.labelCheck}>Yes: </Text>
+            <View style={{marginTop: 4}}>
+              <RadioButton
+                value="Yes"
+                color={COLORS.blue}
+                status={textAssessment === 'Yes' ? 'checked' : 'unchecked'}
+                onPress={() => setTextAssessment('Yes')}
+              />
+            </View>
+            <Text style={styles.labelCheck}>No: </Text>
+            <View style={{marginTop: 4}}>
+              <RadioButton
+                value="No"
+                color={COLORS.blue}
+                status={textAssessment === 'No' ? 'checked' : 'unchecked'}
+                onPress={() => setTextAssessment('No')}
+              />
+            </View>
           </View>
           <View style={{flexDirection: 'row', marginBottom: 18}}>
             <Text style={styles.label}>Date: </Text>
@@ -178,11 +210,12 @@ const AddTripScreen = props => {
             label="Description"
             placeholder="Enter description of the trip"
             onChangeText={descriptionInput => setDescription(descriptionInput)}
+            value={descriptionTripItem}
           />
         </View>
-        <View style={{marginVertical: 20, paddingHorizontal: 20}}>
+        <View style={{marginVertical: 0, paddingHorizontal: 20}}>
           <TouchableOpacity
-            onPress={addTrip}
+            onPress={updateTrip}
             activeOpacity={0.7}
             style={{
               height: 55,
@@ -194,7 +227,25 @@ const AddTripScreen = props => {
             }}>
             <Text
               style={{color: COLORS.white, fontWeight: 'bold', fontSize: 18}}>
-              SUBMIT
+              UPDATE
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{marginVertical: 0, paddingHorizontal: 20}}>
+          <TouchableOpacity
+            onPress={deleteTripById}
+            activeOpacity={0.7}
+            style={{
+              height: 55,
+              width: '100%',
+              backgroundColor: COLORS.red,
+              marginVertical: 20,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={{color: COLORS.white, fontWeight: 'bold', fontSize: 18}}>
+              DELETE
             </Text>
           </TouchableOpacity>
         </View>
@@ -245,6 +296,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: COLORS.blue,
   },
+
+  labelCheck: {
+    marginVertical: 5,
+    fontSize: 18,
+    marginTop: 8,
+    color: COLORS.blue,
+  },
 });
 
-export default AddTripScreen;
+export default UpDateTripScreen;
