@@ -20,12 +20,7 @@ import HomeScreen from './src/screens/Home.screen';
 import ApplicationNavigator from './src/navigators/aplication';
 
 const App = () => {
-  return (
-    <ApplicationNavigator />
-    // <SafeAreaView>
-    //   <HomeScreen />
-    // </SafeAreaView>
-  );
+  return <ApplicationNavigator />;
 };
 
 export default App;

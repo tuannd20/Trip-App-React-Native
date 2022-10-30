@@ -1,13 +1,14 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  SafeAreaView,
   TouchableOpacity,
+  SafeAreaView,
   StyleSheet,
   Text,
   View,
   Image,
   Alert,
   StatusBar,
+  FlatList,
   TouchableWithoutFeedback,
 } from 'react-native';
 import COLORS from '../constant/color';
@@ -24,7 +25,7 @@ const HomeScreen = props => {
         function (tx, res) {
           console.log('item:', res.rows.length);
           if (res.rows.length == 0) {
-            txn.executeSql('DROP TABLE IF EXISTS Trip_Table', []);
+            // txn.executeSql('DROP TABLE IF EXISTS Trip_Table', []);
             txn.executeSql(
               'CREATE TABLE IF NOT EXISTS Trip_Table(id INTEGER PRIMARY KEY AUTOINCREMENT, trip_name TEXT, trip_destination TEXT, trip_date TEXT, trip_assessment TEXT, description TEXT)',
               [],
@@ -36,29 +37,56 @@ const HomeScreen = props => {
     Alert.alert('SQLite Database and Table Successfully Created...');
   };
 
-  const renderTripItem = () => {
+  const [flatListItems, setFlatListItems] = useState([]);
+
+  const getAllTrip = async () => {
+    (await db).transaction(function (tx) {
+      tx.executeSql('SELECT * FROM Trip_Table', [], (tx, results) => {
+        let payload = [];
+        for (let i = 0; i < results.rows.length; ++i)
+          payload.push(results.rows.item(i));
+        setFlatListItems(payload);
+      });
+    });
+  };
+
+  const listTripItem = item => {
     return (
       <TouchableOpacity style={styles.tripItem} activeOpacity={0.6}>
-        <View style={styles.tripItemContent}>
+        <View style={styles.tripItemContent} key={item.user_id}>
           <View style={styles.tripIdArea}>
-            <Text style={styles.tripId}>1</Text>
+            <Text style={styles.tripId}>{item.trip_id}</Text>
           </View>
           <View style={styles.tripNameArea}>
-            <Text style={styles.tripContentFirst}>TripMeeting</Text>
-            <Text style={styles.tripContentSecond}>Hanoi</Text>
+            <Text style={styles.tripContentFirst}>{item.trip_name}</Text>
+            <Text style={styles.tripContentSecond}>
+              {item.trip_destination}
+            </Text>
           </View>
           <View style={styles.tripDateArea}>
-            <Text style={styles.tripContentFirst}>20/10/2022</Text>
-            <Text style={styles.tripContentSecond}>Assessment: Yes</Text>
+            <Text style={styles.tripContentFirst}>{item.trip_date}</Text>
+            <Text style={styles.tripContentSecond}>{item.trip_assessment}</Text>
           </View>
         </View>
       </TouchableOpacity>
     );
   };
 
-  // useEffect(() => {
-  //   createTable();
-  // }, []);
+  const renderTripItem = () => {
+    return (
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        data={flatListItems}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({item}) => listTripItem(item)}
+      />
+    );
+  };
+
+  useEffect(() => {
+    createTable();
+    getAllTrip();
+  }, []);
 
   return (
     <>
@@ -80,7 +108,9 @@ const HomeScreen = props => {
               </View>
             </TouchableWithoutFeedback>
           </View>
-          <View style={{padding: 10, marginTop: 70}}>{renderTripItem()}</View>
+          <View style={{padding: 10, marginTop: 10, flex: 1}}>
+            {renderTripItem()}
+          </View>
         </View>
       </SafeAreaView>
     </>
@@ -89,7 +119,7 @@ const HomeScreen = props => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 8,
+    marginTop: 4,
     height: 800,
     backgroundColor: COLORS.white,
     textAlign: 'center',
