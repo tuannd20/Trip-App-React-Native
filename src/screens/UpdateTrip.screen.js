@@ -157,13 +157,13 @@ const UpDateTripScreen = ({route, navigation}) => {
             label="Name"
             placeholder="Enter name of the trip"
             onChangeText={nameInput => setName(nameInput)}
-            value={nameTripItem}
+            value={name}
           />
           <Input
             label="Destination"
             placeholder="Enter destination of the trip"
             onChangeText={destinationInput => setDestination(destinationInput)}
-            value={destinationTripItem}
+            value={destination}
           />
           <View style={{flexDirection: 'row', marginBottom: 18}}>
             <View style={{marginTop: 3, marginRight: 10}}>
@@ -210,7 +210,7 @@ const UpDateTripScreen = ({route, navigation}) => {
             label="Description"
             placeholder="Enter description of the trip"
             onChangeText={descriptionInput => setDescription(descriptionInput)}
-            value={descriptionTripItem}
+            value={description}
           />
         </View>
         <View style={{marginVertical: 0, paddingHorizontal: 20}}>

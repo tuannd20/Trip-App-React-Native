@@ -39,6 +39,8 @@ const AddTripScreen = props => {
   const [description, setDescription] = useState('');
 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [errorName, setErrorName] = useState('');
+  const [errorDestination, setErrorDestination] = useState('');
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -72,19 +74,39 @@ const AddTripScreen = props => {
     console.log(name, destination, description, text, textAssessment);
 
     if (!name) {
-      alert('Please fill name');
+      // alert('Please fill name');
+      setErrorName('Please input name');
       return;
     }
     if (!destination) {
-      alert('Please fill destination');
+      // alert('Please fill destination');
+      setErrorDestination('Please input destination');
       return;
     }
     if (!textAssessment) {
-      alert('Please fill assessment');
+      Alert.alert(
+        'Warning',
+        'Please select assessment option',
+        [
+          {
+            text: 'Close',
+          },
+        ],
+        {cancelable: false},
+      );
       return;
     }
-    if (!text) {
-      alert('Please select date');
+    if (text === 'Select date of the trip') {
+      Alert.alert(
+        'Warning',
+        'Please select date',
+        [
+          {
+            text: 'Close',
+          },
+        ],
+        {cancelable: false},
+      );
       return;
     }
 
@@ -134,11 +156,13 @@ const AddTripScreen = props => {
             label="Name"
             placeholder="Enter name of the trip"
             onChangeText={nameInput => setName(nameInput)}
+            error={errorName}
           />
           <Input
             label="Destination"
             placeholder="Enter destination of the trip"
             onChangeText={destinationInput => setDestination(destinationInput)}
+            error={errorDestination}
           />
           <View style={{flexDirection: 'row', marginBottom: 18}}>
             <View style={{marginTop: 3, marginRight: 10}}>

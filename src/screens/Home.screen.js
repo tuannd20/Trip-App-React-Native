@@ -113,13 +113,13 @@ const HomeScreen = props => {
   const deleteAllTrip = async () => {
     const query = 'drop table Trip_Table';
 
-    Alert.alert('DELETE FOREVER', 'You want to delete all Trip ???', [
+    Alert.alert('DELETE FOREVER', 'You want to delete all Trip forever ???', [
       {
-        text: 'Yes',
+        text: 'Delete',
         onPress: () => setFlatListItems([]),
       },
       {
-        text: 'No',
+        text: 'Cancel',
         onPress: () => props.navigation.navigate('HomeScreen'),
         style: 'No',
       },
