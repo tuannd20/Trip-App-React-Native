@@ -73,6 +73,11 @@ const AddTripScreen = props => {
   const addTrip = () => {
     console.log(name, destination, description, text, textAssessment);
 
+    if (!name && !destination && !textAssessment) {
+      alert('Please enter value');
+      return;
+    }
+
     if (!name) {
       // alert('Please fill name');
       setErrorName('Please input name');

@@ -117,8 +117,8 @@ const UpDateTripScreen = ({route, navigation}) => {
         (tx, results) => {
           if (results.rowsAffected > 0) {
             Alert.alert(
-              'Success',
-              'Trip deleted successfully',
+              'Delete Trip',
+              'You want to delete the trip ???',
               [
                 {
                   text: 'Ok',

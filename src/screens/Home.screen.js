@@ -34,7 +34,6 @@ const HomeScreen = props => {
         },
       );
     });
-    // Alert.alert('SQLite Database and Table Successfully Created...');
   };
 
   const [flatListItems, setFlatListItems] = useState([]);
